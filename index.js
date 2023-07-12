@@ -1,5 +1,4 @@
 const { spawn } = require('child_process')
-
 class CDODistributionBinary {
   constructor() {
   }
@@ -25,14 +24,20 @@ class CDO {
     return new Promise((resolve, reject) => {
       const env = this.binary.getEnv()
       const executable = this.binary.getExecutable()
-
+      const output = "";
       const cdo = spawn(executable, args, { env })
-
+      let result;
+      cdo.stdout.on('data', (data) => {
+        if (!result)
+          result = data;
+        else result += data;
+      }
+      );
       cdo.on('close', code => {
         if (code !== 0) {
           reject(`CDO failed with code ${code}`)
         } else {
-          resolve()
+          resolve(result.toString())
         }
       })
 
